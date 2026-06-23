@@ -105,34 +105,34 @@ simulate_SIR_with_kernel <- function(
 
 ###GENERATE DATA 
 
-N <- 100000 # Population
-nT <- 50; sigma <- 0.1 ; phi=0.95 # Using an AR1 model to generate the betas
-set.seed(411)  #SEEDING
-
-log_beta <- as.numeric(arima.sim(
-  model = list(ar = phi),
-  n = nT,
-  rand.gen = function(n) rnorm(n, mean = 0, sd = sigma)
-)) 
-#MODEL TO GENERATE THE BETAS IN LOG SCALE
-beta <- exp(log_beta) #TO EXP SCALE
-beta=beta+0.9 #JUST A BIT OF INCREASE TO THE SIGNAL so that the outbreak has a reasonable size
-
-infectious_period <- 3 # (not really important in this case)
-p <- 2 #NUMBER OF DIMENSIONS CONSIDERED
-
-
-#Real parameters
-theta_real <- rgamma(p,2,4) 
-#We normalize
-theta_real=theta_real/sum(theta_real)
-
-hosp_prob <- 0.1 #Hospitalization probability
-sim <- simulate_SIR_with_kernel(
-   nT = length(beta), N = N, beta = beta, infectious_period = infectious_period,hosp_prob=hosp_prob,
-   theta = theta_real, I0 = 10, R0_init = 0, stochastic = TRUE, seed = 222,
-  filename="syn_data.RDS"
- )
- plot(sim$data$H)
+# N <- 100000 # Population
+# nT <- 50; sigma <- 0.1 ; phi=0.95 # Using an AR1 model to generate the betas
+# set.seed(411)  #SEEDING
+# 
+# log_beta <- as.numeric(arima.sim(
+#   model = list(ar = phi),
+#   n = nT,
+#   rand.gen = function(n) rnorm(n, mean = 0, sd = sigma)
+# )) 
+# #MODEL TO GENERATE THE BETAS IN LOG SCALE
+# beta <- exp(log_beta) #TO EXP SCALE
+# beta=beta+0.9 #JUST A BIT OF INCREASE TO THE SIGNAL so that the outbreak has a reasonable size
+# 
+# infectious_period <- 3 # (not really important in this case)
+# p <- 2 #NUMBER OF DIMENSIONS CONSIDERED
+# 
+# 
+# #Real parameters
+# theta_real <- rgamma(p,2,4) 
+# #We normalize
+# theta_real=theta_real/sum(theta_real)
+# 
+# hosp_prob <- 0.1 #Hospitalization probability
+# sim <- simulate_SIR_with_kernel(
+#    nT = length(beta), N = N, beta = beta, infectious_period = infectious_period,hosp_prob=hosp_prob,
+#    theta = theta_real, I0 = 10, R0_init = 0, stochastic = TRUE, seed = 222,
+#   filename="syn_data.RDS"
+#  )
+#  plot(sim$data$H)
 
 

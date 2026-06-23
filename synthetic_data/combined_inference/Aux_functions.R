@@ -1,93 +1,6 @@
 library(extraDistr)
 library(MASS)
 library(tmvtnorm)
-source("SIR_model.R")
-
-plot_param_traces <- function(theta_mat, theta_true, simI,trueI,param_names = NULL,
-                              main = "Parameter trace plots",
-                              col_trace = "#1f77b4", col_true = "#d62728",
-                              lwd_trace = 1.5, lty_true = 2,add_I=T) {
-  # Input checks
-  if (!is.matrix(theta_mat)) stop("theta_mat must be a matrix (M x p).")
-  M <- nrow(theta_mat)
-  p <- ncol(theta_mat)
-  
-  if (length(theta_true) != p) stop("theta_true must have length equal to ncol(theta_mat).")
-  
-  # Names
-  if (is.null(param_names)) {
-    param_names <- colnames(theta_mat)
-    if (is.null(param_names)) {
-      param_names <- paste0("param", seq_len(p))
-    }
-  } else if (length(param_names) != p) {
-    stop("param_names must be NULL or length equal to ncol(theta_mat).")
-  }
-  
-  # Layout: try to make it roughly square
-  ncol_plot <- 2#ceiling(sqrt(p+1))
-  nrow_plot <- ceiling((p+1)/2)#ceiling(sqrt(p+1))
-  
-  old_par <- par(no.readonly = TRUE)
-  on.exit(par(old_par), add = TRUE)
-  par(mfrow = c(nrow_plot, ncol_plot),
-      mar = c(3.2, 3.5, 2.2, 0.8), oma = c(0, 0, 2.5, 0),
-      mgp = c(2, 0.7, 0))
-  
-  # Plot each parameter
-  x <- seq_len(M)
-  for (j in seq_len(p)) {
-    y <- theta_mat[, j]
-    # Clamp plotting range to [0,1] as requested
-    plot(x, y, type = "l", lwd = lwd_trace, col = col_trace,
-         #ylim = c(0, 1),
-         xlab = "Iteration", ylab = "",
-         main =bquote(theta[.(j)]))
-    abline(h = theta_true[j], col = col_true, lty = lty_true, lwd = 2)
-    # Optional: show minor grid
-    grid(col = adjustcolor("grey80", 0.8))
-  }
-  if (add_I){
-  plot(simI,type="l",col=col_trace,lwd=lwd_trace,xlab="Time",ylab="Incidence")
-  lines(trueI,type="l",lty=lty_true,col=col_true,lwd=2)
-  grid(col = adjustcolor("grey80", 0.8))
-  }
-  mtext(main, outer = TRUE, cex = 1.1, font = 2)
-}
-
-
-plot_latent_traces <- function(x_mat, x_true,dimensions=2:8,
-                              main = "Parameter trace plots",
-                              col_trace = "#1f77b4", col_true = "#d62728",
-                              lwd_trace = 1.5, lty_true = 2,add_I=T) {
-  
-  p=dim(x_mat)[3]-1
-  m=length(dimensions)
-  # Layout: try to make it roughly square
-  ncol_plot <- 2#ceiling(sqrt(p+1))
-  nrow_plot <- ceiling((m+1)/2)#ceiling(sqrt(p+1))
-  
-  old_par <- par(no.readonly = TRUE)
-  on.exit(par(old_par), add = TRUE)
-  par(mfrow = c(nrow_plot, ncol_plot),
-      mar = c(3.2, 3.5, 2.2, 0.8), oma = c(0, 0, 2.5, 0),
-      mgp = c(2, 0.7, 0))
-  
-  # Plot each parameter
-  
-  for (j in seq_len(m)) {
-    y <- x_mat[,dimensions[j],p+1]
-    # Clamp plotting range to [0,1] as requested
-    plot(y, type = "l", lwd = lwd_trace, col = col_trace,
-         xlab = "Iteration", ylab = "",
-         main = bquote(X[.(dimensions[j])]))
-    abline(h = x_true[dimensions[j]], col = col_true, lty = lty_true, lwd = 2)
-    # Optional: show minor grid
-    grid(col = adjustcolor("grey80", 0.8))
-  }
-  mtext(main, outer = TRUE, cex = 1.1, font = 2)
-}
-
 #Sample independent gamma and normalized
 rindep_gamma <- function(alpha,beta) {
   y <- rgamma(length(alpha), shape = alpha, rate = beta)
@@ -154,35 +67,6 @@ sample_ref <- function(ref_sample, nsamples, l = 1) {
   }
   output
 }
-
-  esjd <- function(arr) {
- 
-    # arr: array of dimension [it, nT, d]
-    
-    dims <- dim(arr)
-    it <- dims[1]
-    nT <- dims[2]
-    d  <- dims[3]
-    
-    # storage for ESJD per nT
-    esjd <- numeric(nT)
-    
-    for (j in 1:nT) {
-      # extract trajectory for this nT: matrix [it, d]
-      traj <- arr[, j,1:d ]
-      
-      # compute differences between consecutive iterations
-      diffs <- traj[2:it,1:d , drop = FALSE] - traj[1:(it-1), 1:d, drop = FALSE]
-      
-      # squared Euclidean distance at each step
-      sq_jump <- rowSums(diffs^2)
-      
-      # average over iterations
-      esjd[j] <- mean(sq_jump)
-    }
-    
-    return(esjd)
-  }
 
 dmvnorm_vector_vs_matrix <- function(V, MU, Sigma, log = FALSE) {
   # V: p-vector
