@@ -1,0 +1,45 @@
+model {
+
+  #### Priors ####
+
+  # Fixed theta[1] = 1 for identifiability
+  theta[1] <- 1
+
+  # Free parameters for lags 2:p
+  for (m in 1:(p - 1)) {
+    theta_free[m] ~ dgamma(alpha[m + 1], beta[m + 1])
+    theta[m + 1] <- theta_free[m]
+  }
+
+   #### Rt: log-random walk ####
+
+  # Precision corresponding to variance sigma_R^2
+  tau_R <- 1 / pow(sigma_R, 2)
+
+  # Prior for initial R_1 on log scale (choose appropriate hyperparameters)
+  log_Rt[1] ~ dnorm(log_R0, tau_R)
+  Rt[1] <- exp(log_Rt[1])
+
+  # Random walk for t = 2,...,nT
+  for (t in 2:nT) {
+    log_Rt[t] ~ dnorm(0.95*log_Rt[t - 1], tau_R)
+    Rt[t] <- exp(log_Rt[t])
+  }
+
+  #### Latent infections + observation model ####
+
+  I[1] <- I0
+  y[1] ~ dbin(hosp_prob, I[1])
+
+  for (t in 2:nT) {
+
+    for (m in 1:min(t - 1, p)) {
+      mu[t, m] <- Rt[t] * theta[m] * I[t - m]
+    }
+
+    Lambda[t] <- sum(mu[t, 1:min(t - 1, p)])
+
+    I[t] ~ dpois(Lambda[t])
+    y[t] ~ dbin(hosp_prob, I[t])
+  }
+}

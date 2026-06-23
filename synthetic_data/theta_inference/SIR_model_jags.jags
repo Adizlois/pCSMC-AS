@@ -1,0 +1,27 @@
+model {
+# Prior:
+  for (m in 1:p) {
+    theta[m] ~ dgamma(alpha[m], beta[m])
+  }
+ 
+# Latent infections
+
+  # Seeding  
+  I[1]<-I0
+  
+  # Observation model: hospitalizations
+  y[1] ~ dbin(hosp_prob, I[1])
+  
+  for (t in 2:nT) {
+    # Build renewal intensity from realized past infections
+    for (m in 1:min((t-1),p)) {
+      mu[t,m] <- Rt[t] * theta[m] * I[t-m]
+    }
+    # Total rate at time t
+    Lambda[t] <- sum(mu[t,1:min((t-1),p)])
+    # Latent infections
+    I[t] ~ dpois(Lambda[t])
+    # Observation model: hospitalizations
+    y[t] ~ dbin(hosp_prob, I[t])
+  }
+}
