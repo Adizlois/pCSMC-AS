@@ -47,13 +47,12 @@ colpCSMC = function(y,xstar,thetastar,R_t,B,
     #flush.console()
     a1 = 1
     #Ancestor sampling step
-    if ((s>2)){#&(s%%2==0)){
+    if ((s>2)){
     wtilde = w
     #For p(xstar[t,]|xsim[1:t-1,,],\thetasta[nT,])
     for (m in 1:min(s-1,p)){
       wtilde=wtilde+dpois(xstar[s,m],R_t[s]*thetastar[nT,m]*xsim[s-m,p+1,],log=TRUE)
     }
-
     #The other terms p(xstar[t+1:t+p-1,]|) We only need the terms that depend on the particle!
     for (j in 2:p){
       if ((s+j-1)<=nT){
@@ -63,7 +62,6 @@ colpCSMC = function(y,xstar,thetastar,R_t,B,
         }
       }
     }
-    
     #Theta terms
     #First the one that corresponds to p(\theta_T|x_{1:t-1}^i)
     if (s<nT){
@@ -76,7 +74,7 @@ colpCSMC = function(y,xstar,thetastar,R_t,B,
     wtilde[finite] <- exp(wtilde[finite] - m)  
     wtilde[!finite]<-0
     a1 = sample(1:B,1,prob=wtilde)
-    } #End of Ancestor Sampling Step
+    } ##End of Ancestor Sampling Step
 
     w = exp(w-max(w))
     

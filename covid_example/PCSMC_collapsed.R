@@ -128,9 +128,8 @@ Rcpp::sourceCpp("get_cond.cpp")
   {
     nT = length(Rstar)
     p = dim(x)[2]-1
-    Rsim = array(NA,c(nT,B)) #Number of infections. Each "p" represents how many of the infections of that 
-    #day come from each of the previous days. Last dimension is just the sum
-    Rsim[,1] = Rstar
+    Rsim = array(NA,c(nT,B)) 
+    Rsim[,1] = Rstar #Set first particle as the reference
     w = rep(0,B)
     Rsim[1,-1] = exp(rnorm(B-1,0,sigma_R))
     for(s in 2:nT)
@@ -140,6 +139,8 @@ Rcpp::sourceCpp("get_cond.cpp")
       a1=1
       if (AS){ #ANCESTOR SAMPLING STEP
         wtilde = w
+        
+        #AS - RW in log scale and sd=sigma_R
         wtilde=wtilde+dnorm(log(Rstar[s]),log(Rsim[s-1,]),sd=sigma_R,log=TRUE)
         wtilde[is.infinite(wtilde)]<--100 #Arbitrary
         wtilde <- exp(wtilde- max(wtilde))  
@@ -153,8 +154,8 @@ Rcpp::sourceCpp("get_cond.cpp")
       #Forward model
       Rsim[s,-1 ] <- exp(rnorm(B-1,log(Rsim[s-1,-1]),sd=sigma_R))
       
+      #Estimate the weights
       kmax <- min(p, s - 1)
-      
       for(k in 1:kmax){
         w = w+ dpois(x[s,k],Rsim[s,]*theta[k]*x[(s-k),p+1],log=TRUE)
         w[is.infinite(w)]<--100 #Arbitrary
@@ -162,7 +163,7 @@ Rcpp::sourceCpp("get_cond.cpp")
     }
     w = exp(w-max(w))
     k = sample(1:B,1,prob=w)
-    Rsim[,k]
+    Rsim[,k] #Pick new reference
   }
   
   
@@ -192,6 +193,7 @@ SMCGibbs_R = function(y,hosp_prob,p,alpha0=2,beta0=4,B=100,M=100,seed_=100)
     cat("\r Iteration ",m, " ")
     
     #Sample x and theta given R_{1:T} using col-pCSMC
+    #First iteration without ancestor sampling to avoid potential "impossible" transitions
     if(m==1){
     res<-col_pCSMC(y,xstar=xsim,thetastar=thetasim,R_t,B,
                      hosp_prob,alpha=alpha0,beta=beta0,AS=F)

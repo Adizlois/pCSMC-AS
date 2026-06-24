@@ -42,6 +42,7 @@ inits_fun <- function() {
 
 params <- c("theta", "I", "Lambda")
 
+# Initialize
 mod <- jags.model(
   file = "SIR_model_jags.jags",
   data = data_list,
@@ -49,27 +50,14 @@ mod <- jags.model(
   n.chains = 3,
   n.adapt = 2000
 )
-
+#Burn-in
 update(mod, 50000)  # burn-in
-
+#Sample
 samps <- coda.samples(
   mod,
   variable.names = params,
   n.iter = 50000,
   thin = 3
 )
-gelman.diag(samps,multivariate=FALSE)
 
-
-# Posterior summaries
-mcmc_list <- as.mcmc.list(samps)
-nchains <- length(mcmc_list)
-niter   <- nrow(mcmc_list[[1]])
-npar    <- ncol(mcmc_list[[1]])
-
-arr <- array(NA, dim = c(niter, npar, nchains))
-
-for (i in 1:nchains) {
-  arr[ , , i] <- as.matrix(mcmc_list[[i]])
-}
-saveRDS(arr,"./SIR_jags.rds")
+saveRDS(samps,"./Jags.rds")
