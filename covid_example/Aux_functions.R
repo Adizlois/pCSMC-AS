@@ -15,7 +15,7 @@ samptheta1<-function(xsim,R_t,alpha=NULL,beta=NULL){
   if (is.null(alpha)) alpha <- rep(2, p)
   if (is.null(beta))  beta  <- rep(4, p)
   
-  newalpha=alpha+apply(xsim[2:nT,1:p],2,sum,na.rm=T)
+  newalpha=alpha+apply(xsim[2:nT,1:p],2,sum)
   #Exposures
   # Exposures by lag: E_m = sum_t R_t * X_{t-m}
   Xtot <- xsim[, p + 1]

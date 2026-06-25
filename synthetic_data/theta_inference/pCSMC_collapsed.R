@@ -158,7 +158,7 @@ B = 300  #Particles
 
 
 if(runpCSMC){
-  resPCSMC =pSMCGibbs(y=syn_data$data$H,R_t=syn_data$data$Rt,hosp_prob=syn_data$hosp_prob,p=length(syn_data$theta_real),B=B,M=M,
+  resPCSMC =pSMCGibbs(y=y,R_t=Rt,hosp_prob=hosp_prob,p=p,B=B,M=M,
                       sseed = 3)
   saveRDS(resPCSMC,"SIR_PCSMC_collapsed.rds")
 }

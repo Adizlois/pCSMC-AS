@@ -198,7 +198,7 @@ M = 10000 #Iterations
 B = 300   #Particles per CSMC run
 
 if(runpCSMC_marginal){
-  resPCSMC_marginal =pSMCGibbs_marginal(y=syn_data$data$H,R_t=syn_data$data$Rt,hosp_prob=syn_data$hosp_prob,p=length(syn_data$theta_real),B=B,M=M,
+  resPCSMC_marginal =pSMCGibbs_marginal(y=y,R_t=Rt,hosp_prob=hosp_prob,p=p,B=B,M=M,
                       sseed = 3)
   saveRDS(resPCSMC_marginal,"SIR_PCSMC_marginal.rds")
 }

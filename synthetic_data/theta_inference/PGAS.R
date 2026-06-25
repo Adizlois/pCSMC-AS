@@ -118,10 +118,10 @@ p=length(syn_data$theta_real)
 ##RUN PGAS
 
   runPGAS = T
-  M = 40000
-  B = 300
+  M = 40000 #Iterations
+  B = 300 #Particles
   
   if(runPGAS){
-    resPGAS = SMCGibbs(y=sim$data$H,R_t=sim$data$Rt,hosp_prob=sim$hosp_prob,p=length(sim$theta_real),B=B,M=M,seed_=132)
+    resPGAS = SMCGibbs(y=y,R_t=Rt,hosp_prob=hosp_prob,p=p,B=B,M=M,seed_=132)
     saveRDS(resPGAS,"SIR_PGAS.rds")
   }

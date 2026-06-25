@@ -69,3 +69,4 @@ samps <- coda.samples(
 )
 
 saveRDS(samps,"./Jags.rds")
+

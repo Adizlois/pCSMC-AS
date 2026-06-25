@@ -6,7 +6,8 @@ source("Aux_functions.R")
 Rcpp::sourceCpp("get_cond.cpp")
 
 ###IMPLEMENTATION OF PARTIALLY COLLAPSED pCSMC WITH ANCESTOR SAMPLING
-  col-pCSMC-AS = function(y,xstar,thetastar,R_t,B,
+  
+colpCSMCAS = function(y,xstar,thetastar,R_t,B,
                    hosp_prob,alpha=NULL,beta=NULL,AS=T)
   {
     nT = dim(xstar)[1]
@@ -129,7 +130,8 @@ Rcpp::sourceCpp("get_cond.cpp")
   
   #CSMC ROUTINE TO SAMPLE R_{1:T} GIVEN X_{1:T} AND THETA. WE ASSUME A RW
   #DYNAMIC MODEL IN R
-  CSMC_R = function(x,Rstar,theta,B,sigma_R,
+  
+CSMC_R = function(x,Rstar,theta,B,sigma_R,
                     AS=T)
   {
     nT = length(Rstar)
@@ -203,11 +205,11 @@ SMCGibbs_R = function(y,hosp_prob,p,alpha0=2,beta0=4,B=100,M=100,sigma_R=0.25,se
     #Sample x and theta given R_{1:T} using col-pCSMC
     #First iteration without ancestor sampling to avoid potential "impossible" transitions
     if(m==1){
-    res<-col-pCSMC-AS(y,xstar=xsim,thetastar=thetasim,R_t,B,
+    res<-colpCSMCAS(y,xstar=xsim,thetastar=thetasim,R_t,B,
                      hosp_prob,alpha=NULL,beta=NULL,AS=F)
     }
     else{
-      res<-col-pCSMC-AS(y,xstar=xsim,thetastar=thetasim,R_t,B,
+      res<-colpCSMCAS(y,xstar=xsim,thetastar=thetasim,R_t,B,
                  hosp_prob,alpha=NULL,beta=NULL,AS=T)
     }
     
@@ -250,7 +252,7 @@ p=length(sim$theta_real)
   B = 300  #Particles
   
   if(runPCSMC){
-    resCSMC = SMCGibbs_R(y=sim$data$H,hosp_prob=sim$hosp_prob,p=length(sim$theta_real),B=B,M=M)
+    resCSMC = SMCGibbs_R(y=y,hosp_prob=hosp_prob,p=p,B=B,M=M)
     saveRDS(resCSMC,"SIR_PCSMC_synthetic.rds")
   }
   
